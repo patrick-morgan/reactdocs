@@ -1,13 +1,16 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as path from 'path';
 import axios from 'axios';
 
+import { Remarkable } from 'remarkable';
+import hljs = require('highlight.js');
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-    const provider = new DocumentationViewProvider();
+    const provider = new DocumentationViewProvider(context.extensionPath);
     let viewType = "reactdocs.documentation";
     let disposable = vscode.window.registerWebviewViewProvider(viewType, provider);
     context.subscriptions.push(disposable);
@@ -17,8 +20,11 @@ class DocumentationViewProvider implements vscode.WebviewViewProvider{
     private disposables: vscode.Disposable[] = [];
     private view?: vscode.WebviewView;
     private viewType: string = "reactdocs.documentation";
+    private _extensionPath: string = "";
 
-    constructor() {
+    constructor(extensionPath: string) {
+        this._extensionPath = extensionPath;
+
         vscode.window.onDidChangeActiveTextEditor(() => {
             this.update();
         }, null, this.disposables);
@@ -77,12 +83,22 @@ class DocumentationViewProvider implements vscode.WebviewViewProvider{
     }
 
     loadWebviewHtml() {
+        const onDiskPath = vscode.Uri.file(
+            path.join(this._extensionPath, 'node_modules', 'highlight.js', 'styles', 'vs2015.css')
+        );
+        const syntaxHighlightingStyles = this.view?.webview.asWebviewUri(onDiskPath);
         return `<!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>React Documentation</title>
+            <link href="${syntaxHighlightingStyles}" rel="stylesheet">
+            <style>
+                pre:first-child { font-size: 2em; font-weight: bold; }
+                pre:not(:first-child) { background-color: #0F0F0F; padding: 10px; border-radius: 10px; overflow-x: auto; }
+                blockquote { width: calc(100% - 20px); margin: 0; padding: 5px 10px; border-radius: 10px; }
+            </style>
         </head>
         <body>
             <div id="doc">No documentation found</div>
@@ -111,9 +127,23 @@ class DocumentationViewProvider implements vscode.WebviewViewProvider{
 
     buildHtml(link: string, docstring: string) {
         docstring += `[Read More ...](${link})`;
-        var showdown = require('showdown');
-        var converter = new showdown.Converter();
-        return converter.makeHtml(docstring);
+        const md = new Remarkable({
+            highlight: (str: string, lang: string) => {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(lang, str).value;
+                    } catch (err) {}
+                }
+            
+                try {
+                    return hljs.highlightAuto(str).value;
+                } catch (err) {}
+            
+                return ''; // use external default escaping
+            }
+        });
+        console.log(md.render(docstring));
+        return md.render(docstring);
     }
 }
 
