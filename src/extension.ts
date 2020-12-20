@@ -21,10 +21,10 @@ class DocumentationViewProvider implements vscode.WebviewViewProvider{
     constructor() {
         vscode.window.onDidChangeActiveTextEditor(() => {
             this.update();
-        }, null, this.disposables)
+        }, null, this.disposables);
         vscode.window.onDidChangeTextEditorSelection(() => {
             this.update();
-        }, null, this.disposables)
+        }, null, this.disposables);
     }
 
     // TODO: figure out if we need to implement
@@ -46,7 +46,7 @@ class DocumentationViewProvider implements vscode.WebviewViewProvider{
     }
 
     async update() {
-        if(!this.view){
+        if (!this.view) {
             return;
         }
 
@@ -57,13 +57,14 @@ class DocumentationViewProvider implements vscode.WebviewViewProvider{
             let currentSelectedWords: string = editor.document.getText(editor.selection);
             const timer = setTimeout(async () => {
                 const newEditor = vscode.window.activeTextEditor;
-                if (newEditor && currentSelectedWords == newEditor.document.getText(newEditor.selection)) {
+                if (newEditor && currentSelectedWords === newEditor.document.getText(newEditor.selection)) {
                     const html = await this.indexServer(currentSelectedWords);
                     // send messsage to webview
                     if (html.length > 0) {
                         this.view?.webview.postMessage({
                             body: html
                         });
+                        this.view?.show(true);
                     } else {
                         this.view?.webview.postMessage({
                             body: "No documentation found"
@@ -84,7 +85,7 @@ class DocumentationViewProvider implements vscode.WebviewViewProvider{
             <title>React Documentation</title>
         </head>
         <body>
-            <div id="doc"><p>Loading ... </p></div>
+            <div id="doc">No documentation found</div>
             <script type="text/javascript">
                 const doc = document.getElementById('doc');
                 window.addEventListener('message', event => {
