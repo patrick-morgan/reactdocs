@@ -10,16 +10,19 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:reactdocs.helloWorld"
+		"*"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
-		"commands": [
-			{
-				"command": "reactdocs.helloWorld",
-				"title": "Hello World"
-			}
-		]
+		"views": {
+			"explorer": [
+				{
+					"type": "webview",
+					"id": "reactdocs.documentation",
+					"name": "Documentation"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",
