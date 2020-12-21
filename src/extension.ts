@@ -6,6 +6,8 @@ import axios from 'axios';
 
 import { Remarkable } from 'remarkable';
 import hljs = require('highlight.js');
+import {existsSync} from 'fs';
+import {promises as fsPromises} from 'fs'
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -64,7 +66,7 @@ class DocumentationViewProvider implements vscode.WebviewViewProvider{
             const timer = setTimeout(async () => {
                 const newEditor = vscode.window.activeTextEditor;
                 if (newEditor && currentSelectedWords === newEditor.document.getText(newEditor.selection)) {
-                    const html = await this.indexServer(currentSelectedWords);
+                    const html = await this.queryDocsData(currentSelectedWords);
                     // send messsage to webview
                     if (html.length > 0) {
                         this.view?.webview.postMessage({
@@ -113,16 +115,37 @@ class DocumentationViewProvider implements vscode.WebviewViewProvider{
     }
 
     // function queries server, and returns html
-    async indexServer(words: string) {
+    async queryDocsData(highlightedContent: string) {
         const url = "https://reactdocs-server-1.vercel.app/api/";
-        const body = {
-            "name": words
-        };
-        const resp: { data: ReferenceResponse } = await axios.post(url, body);
-        if (resp.data.success) {
-            return this.buildHtml(resp.data.data.link, resp.data.data.docstring);
+
+        var docFilePath = `${__dirname}/docs.json`;
+
+        // Create file if doesn't exist
+        if (!existsSync(docFilePath)) {
+            const resp: { data: ReferenceResponse } = await axios.get(url);
+            if (resp.data.success) {
+                const file = await fsPromises.writeFile(docFilePath, JSON.stringify(resp.data.data), 'utf-8');
+            } else {
+                return "";
+            }
+        }
+        const docData = await this.readFile(docFilePath, highlightedContent);
+
+        if (docData.length) {
+            return this.buildHtml(docData[0], docData[1]);
         }
         return "";
+    }
+
+    async readFile(docFilePath: string, highlightedContent: string) {
+        const file = await fsPromises.readFile(docFilePath, 'utf-8');
+        // file contains 'data', iterate through it and return
+        const docs = await JSON.parse(file);
+        
+        if (docs[highlightedContent]) {
+            return [docs[highlightedContent]["link"], docs[highlightedContent]["docstring"]];
+        } 
+        return [];
     }
 
     buildHtml(link: string, docstring: string) {
