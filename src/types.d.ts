@@ -3,6 +3,11 @@ interface ReferenceResponse {
     data: Component;
 }
 
+interface GithubResponse {
+    name: string;
+    download_url: string;
+}
+
 interface Component {
     name: string;
     link: string;
