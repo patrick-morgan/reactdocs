@@ -7,7 +7,9 @@ import axios from 'axios';
 import { Remarkable } from 'remarkable';
 import hljs = require('highlight.js');
 import {existsSync} from 'fs';
-import {promises as fsPromises} from 'fs'
+import {promises as fsPromises} from 'fs';
+
+import { getDocs } from './pullReactDocs';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -23,6 +25,7 @@ class DocumentationViewProvider implements vscode.WebviewViewProvider{
     private view?: vscode.WebviewView;
     private viewType: string = "reactdocs.documentation";
     private _extensionPath: string = "";
+    private docLookup: Components = {};
 
     constructor(extensionPath: string) {
         this._extensionPath = extensionPath;
@@ -33,6 +36,8 @@ class DocumentationViewProvider implements vscode.WebviewViewProvider{
         vscode.window.onDidChangeTextEditorSelection(() => {
             this.update();
         }, null, this.disposables);
+
+        this.pullDocsData();
     }
 
     // TODO: figure out if we need to implement
@@ -114,38 +119,34 @@ class DocumentationViewProvider implements vscode.WebviewViewProvider{
         </html>`;
     }
 
-    // function queries server, and returns html
-    async queryDocsData(highlightedContent: string) {
-        const url = "https://reactdocs-server-1.vercel.app/api/";
-
-        var docFilePath = `${__dirname}/docs.json`;
-
-        // Create file if doesn't exist
+    async pullDocsData() {
+        const docFilePath = `${__dirname}/docs.json`;
         if (!existsSync(docFilePath)) {
-            const resp: { data: ReferenceResponse } = await axios.get(url);
-            if (resp.data.success) {
-                const file = await fsPromises.writeFile(docFilePath, JSON.stringify(resp.data.data), 'utf-8');
-            } else {
-                return "";
-            }
+            const docLookup: Components = await getDocs();
+            await fsPromises.writeFile(
+                docFilePath,
+                JSON.stringify(docLookup),
+                'utf-8'
+            );
+            this.docLookup = docLookup;
+        } else {
+            const docFilePath = `${__dirname}/docs.json`;
+            const fileData: string = await fsPromises.readFile(docFilePath, 'utf-8');
+            const docLookup: Components = await JSON.parse(fileData);
+            this.docLookup = docLookup;
         }
-        const docData = await this.readFile(docFilePath, highlightedContent);
-
-        if (docData.length) {
-            return this.buildHtml(docData[0], docData[1]);
-        }
-        return "";
     }
 
-    async readFile(docFilePath: string, highlightedContent: string) {
-        const file = await fsPromises.readFile(docFilePath, 'utf-8');
-        // file contains 'data', iterate through it and return
-        const docs = await JSON.parse(file);
-        
-        if (docs[highlightedContent]) {
-            return [docs[highlightedContent]["link"], docs[highlightedContent]["docstring"]];
-        } 
-        return [];
+    // function queries server, and returns html
+    async queryDocsData(highlightedContent: string) {
+        if (!this.docLookup.hasOwnProperty(highlightedContent)) {
+            return "";
+        }
+
+        const highlightedComponent: Component = this.docLookup[highlightedContent];
+        const html = this.buildHtml(highlightedComponent.link, highlightedComponent.docstring);
+
+        return html;
     }
 
     buildHtml(link: string, docstring: string) {
