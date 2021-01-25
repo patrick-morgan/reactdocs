@@ -1,8 +1,9 @@
 {
     "name": "reactdocs",
-    "displayName": "reactdocs",
-    "description": "Easily view React docs in VS Code",
-    "version": "0.0.1",
+    "displayName": "React Docs",
+    "description": "Easily view React documentation in VS Code",
+    "version": "1.0.0",
+    "publisher": "PatrickMorgan",
     "engines": {
         "vscode": "^1.52.0"
     },
@@ -12,6 +13,11 @@
     "activationEvents": [
         "*"
     ],
+    "keywords": [
+      "react", "docs", "documentation", "javascript", "react documentation"
+    ],
+    "icon": "images/react-logo.png",
+    "license": "SEE LICENSE IN LICENSE.TXT",
     "main": "./dist/extension.js",
     "contributes": {
         "views": {
@@ -34,6 +40,13 @@
         "pretest": "npm run test-compile && npm run lint",
         "lint": "eslint src --ext ts",
         "test": "node ./out/test/runTest.js"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/patrick-morgan/reactdocs"
+    },
+    "bugs": {
+      "url": "https://github.com/patrick-morgan/reactdocs/issues"
     },
     "devDependencies": {
         "@types/glob": "^7.1.3",
