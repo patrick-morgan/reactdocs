@@ -64,17 +64,19 @@ export default class ReactReferenceParser {
                 noticeCurrentComponent = true;
 
                 const children = node.children as mdast.Content[];
-                let name = children[0].value as string;
-                name = name.replace(/\(\)/g, "");
-                
-                let names = name.split(" ");
-                name = names[names.length - 1];
 
-                names = name.split(".");
-                currentComponent.name = names[names.length - 1];
+                if (children[0].type !== "inlineCode") {
+                    noticeCurrentComponent = false;
+                } else {
+                    let name = children[0].value as string;
+                    name = name.replace(/\(\)/g, "");
+                    
+                    let names = name.split(" ");
+                    name = names[names.length - 1];
 
-                if (children[0].type !== "inlineCode") noticeCurrentComponent = false;
-                else {
+                    names = name.split(".");
+                    currentComponent.name = names[names.length - 1];
+
                     const anchor = (children[1].value as string).slice(2, -1);
                     currentComponent.link = `${this.permalink}${anchor}`;
                 }

@@ -2,12 +2,16 @@ import axios from 'axios';
 
 import ReactReferenceParser from './parsers/ReactReferenceParser';
 
-const reactReferenceUrl = "https://raw.githubusercontent.com/reactjs/reactjs.org/master/content/docs/reference-react.md";
-const reactComponentReferenceUrl = "https://raw.githubusercontent.com/reactjs/reactjs.org/master/content/docs/reference-react-component.md";
-const hooksReferenceUrl = "https://raw.githubusercontent.com/reactjs/reactjs.org/master/content/docs/hooks-reference.md";
 
 export const getDocs = async () => {
-    const urls = [reactReferenceUrl, reactComponentReferenceUrl, hooksReferenceUrl];
+    const rootUrl = "https://api.github.com/repos/reactjs/reactjs.org/contents/content/docs";
+    const files: [GithubResponse] = (await axios.get(rootUrl)).data;
+
+    const markdownFiles = files.filter(
+        file => file.name.slice(-2).toLowerCase() === "md"
+    );
+
+    const urls = markdownFiles.map(file => file.download_url);
 
     // get markdown
     const promises = urls.map(url => axios.get<string>(url));
