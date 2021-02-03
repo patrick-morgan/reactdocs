@@ -1,16 +1,13 @@
 # reactdocs
 
-A VS Code extension that automatically pulls up react documentation in the sidebar
+View React documentation directly in the sidebar of Visual Studio Code
 
 ## Features
 
-Automatically pull up react documentation based on the text the cursor is highlighting
+Highlight a function to display the documentation
 
 ![](https://github.com/patrick-morgan/reactdocs/blob/main/src/images/docs1.gif "React Docs")
 
-Side panel displays the link to read the documentation directly in the browser
+View full docs by clicking the link at the bottom
 
 ![](https://github.com/patrick-morgan/reactdocs/blob/main/src/images/docs2.gif "React Docs")
-
-
-Documentation panel opens automatically upon the extension being enabled
