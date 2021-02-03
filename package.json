@@ -14,7 +14,11 @@
         "*"
     ],
     "keywords": [
-      "react", "docs", "documentation", "javascript", "react documentation"
+        "react",
+        "docs",
+        "documentation",
+        "javascript",
+        "react documentation"
     ],
     "icon": "images/react-logo.png",
     "license": "SEE LICENSE IN LICENSE.TXT",
@@ -42,11 +46,11 @@
         "test": "node ./out/test/runTest.js"
     },
     "repository": {
-      "type": "git",
-      "url": "https://github.com/patrick-morgan/reactdocs"
+        "type": "git",
+        "url": "https://github.com/patrick-morgan/reactdocs"
     },
     "bugs": {
-      "url": "https://github.com/patrick-morgan/reactdocs/issues"
+        "url": "https://github.com/patrick-morgan/reactdocs/issues"
     },
     "devDependencies": {
         "@types/glob": "^7.1.3",
