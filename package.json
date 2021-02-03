@@ -2,7 +2,7 @@
     "name": "reactdocs",
     "displayName": "React Docs",
     "description": "Easily view React documentation in VS Code",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "publisher": "PatrickMorgan",
     "engines": {
         "vscode": "^1.52.0"
@@ -22,7 +22,7 @@
     ],
     "icon": "images/react-logo.png",
     "license": "SEE LICENSE IN LICENSE.TXT",
-    "main": "./dist/extension.js",
+    "main": "./dist/extension",
     "contributes": {
         "views": {
             "explorer": [
